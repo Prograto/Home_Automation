@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Appliance Control</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; }
+    .button { padding: 16px 40px; font-size: 24px; margin: 20px; cursor: pointer; }
+    .on { background-color: #4CAF50; color: white; }
+    .off { background-color: #f44336; color: white; }
+  </style>
+</head>
+<body>
+  <h1>Appliance Control</h1>
+  <div id="status">Loading...</div>
+  <button id="onButton" class="button on">Turn ON</button>
+  <button id="offButton" class="button off">Turn OFF</button>
+
+  <script>
+    const scriptUrl = 'https://script.google.com/macros/s/AKfycbxLW3nBqMJsv2aUBjAOPBnMdryM93eiODGQoi6m7g_l_aREv4vbPWpqQ6Gc1wphijdecQ/exec';
+
+    $(document).ready(function() {
+      updateStatus();
+
+      $('#onButton').click(function() {
+        sendAction('ON');
+      });
+
+      $('#offButton').click(function() {
+        sendAction('OFF');
+      });
+    });
+
+    function updateStatus() {
+      $.get(scriptUrl, {action: 'getStatus'}, function(data) {
+        $('#status').text('Status: ' + data);
+        if (data === 'ON') {
+          $('#onButton').prop('disabled', true).text('ON (Active)');
+          $('#offButton').prop('disabled', false).text('Turn OFF');
+        } else {
+          $('#onButton').prop('disabled', false).text('Turn ON');
+          $('#offButton').prop('disabled', true).text('OFF (Inactive)');
+        }
+      });
+    }
+
+    function sendAction(action) {
+      var payload = {
+        timestamp: new Date().toISOString(),
+        action: action
+      };
+
+      $.post(scriptUrl, JSON.stringify(payload), function() {
+        updateStatus();
+      });
+    }
+  </script>
+</body>
+</html>
